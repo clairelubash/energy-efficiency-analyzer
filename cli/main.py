@@ -1,4 +1,5 @@
-import sys
+import os
+import argparse
 from analyzer.static_analyzer import StaticAnalyzer
 from analyzer.estimator import estimate_energy
 from analyzer.suggester import suggest_optimizations
@@ -7,26 +8,29 @@ from analyzer.profiler import profile_code
 
 
 def main():
-    if len(sys.argv) < 2:
-        print("Usage: python -m cli.main <script_to_analyze.py>")
-        sys.exit(1)
+    parser = argparse.ArgumentParser(description="Energy Efficiency Analyzer")
+    parser.add_argument("script", help="Python script to analyze")
+    parser.add_argument("--output", help="Output markdown file", default="energy_report.md")
+    args = parser.parse_args()
 
-    script_path = sys.argv[1]
-    with open(script_path, 'r') as f:
+    with open(args.script, 'r') as f:
         code = f.read()
 
     analyzer = StaticAnalyzer()
     stats = analyzer.analyze(code)
     estimate = estimate_energy(stats)
     suggestions = suggest_optimizations(stats)
-    profile_summary = profile_code(script_path)
-    report = generate_report(stats, estimate, suggestions, profile_summary)
+    profile_summary, mem_current, mem_peak = profile_code(args.script)
+    report = generate_report(stats, estimate, suggestions, profile_summary, mem_current, mem_peak)
 
-    output_path = "energy_report.md"
-    with open(output_path, 'w') as f:
+    output_dir = os.path.dirname(args.output)
+    if output_dir and not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
+    with open(args.output, 'w') as f:
         f.write(report)
 
-    print(f"Report generated: {output_path}")
+    print(f"Report generated: {args.output}")
 
 
 if __name__ == "__main__":

@@ -1,3 +1,5 @@
+import io
+
 def recurse(n):
     if n == 0:
         return 0
@@ -5,8 +7,10 @@ def recurse(n):
 
 def process():
     for i in range(10):
-        with open("file.txt", "w") as f:
-            f.write(str(i))
+        # Simulate I/O without actual disk write
+        fake_file = io.StringIO()
+        fake_file.write(str(i))
+        fake_file.close()
     recurse(5)
 
 process()
