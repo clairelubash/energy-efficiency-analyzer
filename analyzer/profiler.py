@@ -3,7 +3,19 @@ import pstats
 import io
 import tracemalloc
 
-def profile_code(script_path):
+def profile_code(script_path: str) -> tuple[str, float, float]:
+    """
+    Profile a Python script to get runtime statistics and memory usage.
+
+    Args:
+        script_path (str): The file path of the Python script to profile.
+
+    Returns:
+        tuple[str, float, float]: A tuple containing:
+            - A string summary of top function calls sorted by cumulative time.
+            - The current memory usage in MB.
+            - The peak memory usage in MB.
+    """
     pr = cProfile.Profile()
     tracemalloc.start()
     pr.enable()

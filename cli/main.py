@@ -7,7 +7,12 @@ from analyzer.report_generator import generate_report
 from analyzer.profiler import profile_code
 
 
-def main():
+def main() -> None:
+    """
+    Command-line entry point for analyzing a Python script's energy and performance.
+    
+    Parses arguments, runs static and dynamic analysis, and writes a markdown report.
+    """
     parser = argparse.ArgumentParser(description="Energy Efficiency Analyzer")
     parser.add_argument("script", help="Python script to analyze")
     parser.add_argument("--output", help="Output markdown file", default="energy_report.md")
