@@ -36,7 +36,8 @@ def generate_report(
     suggestions: list[str],
     profile_summary: str,
     mem_current: float,
-    mem_peak: float
+    mem_peak: float, 
+    is_repo: bool = False
 ) -> str:
     """
     Generate a markdown report summarizing energy estimate, code analysis, suggestions, 
@@ -49,6 +50,7 @@ def generate_report(
         profile_summary (str): Text summary of profiling stats.
         mem_current (float): Current memory usage in MB.
         mem_peak (float): Peak memory usage in MB.
+        is_repo (bool): Indicates whether to analyze a full repo or a single file. Defaults to False.
 
     Returns:
         str: Complete markdown report as a string.
@@ -65,8 +67,10 @@ def generate_report(
 
     if stats["io_calls"]:
         report.append("\n### Detailed I/O Calls:")
-        for call, lineno in stats["io_calls"]:
-            report.append(f"- `{call}` at line {lineno}")
+        # Remove duplicates and sort by line number
+        unique_io_calls = sorted(set(stats["io_calls"]), key=lambda x: (x[2], x[1]))
+        for call, lineno, filename in unique_io_calls:
+            report.append(f"- `{call}` in `{filename}` at line {lineno}")
 
     report.append("\n### Suggestions:")
     if suggestions:
@@ -74,10 +78,12 @@ def generate_report(
     else:
         report.append("- No major optimizations suggested.")
 
-    report.append("\n### Profiling Summary (Top 10 by cumulative time):\n")
-    report.append("```text\n" + profile_summary + "```\n")
+    if not is_repo:
 
-    report.append("\n### Visual Summary:\n")
-    report.append(generate_chart(stats['loop_count'], len(stats['recursive_calls']), len(stats['io_calls'])))
+        report.append("\n### Profiling Summary (Top 10 by cumulative time):\n")
+        report.append("```text\n" + profile_summary + "```\n")
+
+        report.append("\n### Visual Summary:\n")
+        report.append(generate_chart(stats['loop_count'], len(stats['recursive_calls']), len(stats['io_calls'])))
 
     return "\n".join(report)

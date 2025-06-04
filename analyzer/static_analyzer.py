@@ -12,11 +12,12 @@ class StaticAnalyzer(ast.NodeVisitor):
         function_defs (list[str]): Names of all functions defined in the code.
     """
 
-    def __init__(self) -> None:
-        self.loop_count: int = 0
-        self.recursive_calls: list[tuple[str, int]] = []
-        self.io_calls: list[tuple[str, int]] = []
-        self.function_defs: list[str] = []
+    def __init__(self, filename: str = "<unknown>"):
+        self.loop_count = 0
+        self.recursive_calls = []
+        self.io_calls = []
+        self.function_defs = []
+        self.filename = filename
 
     def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
         """
@@ -57,7 +58,7 @@ class StaticAnalyzer(ast.NodeVisitor):
         """
         if isinstance(node.func, ast.Name):
             if node.func.id in ("open", "read", "write"):
-                self.io_calls.append((node.func.id, node.lineno))
+                self.io_calls.append((node.func.id, node.lineno, self.filename))
             if node.func.id in self.function_defs:
                 self.recursive_calls.append((node.func.id, node.lineno))
         self.generic_visit(node)
