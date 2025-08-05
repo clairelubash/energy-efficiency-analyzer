@@ -1,0 +1,18 @@
+[project]
+name = "energy-efficiency-analyzer"
+version = "0.1.0"
+description = "A tool for analyzing Python scripts and GitHub repos for energy efficiency."
+authors = [{name = "Claire Lubash"}]
+requires-python = ">=3.9"
+
+dependencies = [
+    "typer",
+    "matplotlib",
+    "requests"
+]
+
+[tool.mypy]
+strict = true
+
+[tool.black]
+line-length = 88

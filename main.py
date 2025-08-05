@@ -1,6 +1,7 @@
 import logging
 import typer
 from urllib.parse import urlparse
+import concurrent.futures
 from analyzer.static_analyzer import StaticAnalyzer
 from analyzer.estimator import estimate_energy
 from analyzer.suggester import suggest_optimizations
@@ -54,10 +55,15 @@ def repo(
 
     files = fetch_py_files_from_repo(owner, repo_name, branch, token)
 
-    total_stats = {"loop_count": 0, "recursive_calls": [], "io_calls": []}
-    for file in files:
+    def analyze_file(file):
         analyzer = StaticAnalyzer(filename=file["path"])
-        stats = analyzer.analyze(file["content"])
+        return analyzer.analyze(file["content"])
+
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        results = list(executor.map(analyze_file, files))
+
+    total_stats = {"loop_count": 0, "recursive_calls": [], "io_calls": []}
+    for stats in results:
         total_stats["loop_count"] += stats["loop_count"]
         total_stats["recursive_calls"].extend(stats["recursive_calls"])
         total_stats["io_calls"].extend(stats["io_calls"])
